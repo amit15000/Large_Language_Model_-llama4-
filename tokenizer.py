@@ -50,6 +50,8 @@ print(word_splits)
 
 import collections
 
+
+# {(t,h):2, (i,s):4}
 def get_pair_stats(splits):
     """Counts the frequency of adjacent pairs in the word splits."""
     pair_counts = collections.defaultdict(int)
@@ -61,7 +63,90 @@ def get_pair_stats(splits):
     
     return pair_counts
 
+# ### Helper Function: `merge_pair`
+# (t , h, i ,s ) ==> (t, h , is)
+def merge_pair(pair_to_merge, splits):
+    """Merge the specified pair in the words present in split"""
+    (first, second) = pair_to_merge
+    merged_token = first+second
+    new_splits ={}
+    for word_token , freq in splits.items():
+        symbols = list(word_token)
+        new_symbols = []
+        i = 0
+        while i < len(symbols):
+            if(i<len(symbols)-1 and symbols[i]== first and symbols[i+1] == second ):
+                new_symbols.append(merged_token)
+                i += 2
+            else :
+                new_symbols.append(symbols[i])
+                i+=1
+        new_splits[tuple(new_symbols)]= freq
+    return new_splits
 
 
+# --- BPE Training Loop Initialization ---
+num_merges = 15
+merges = {}
+current_splits = word_splits.copy() # Start with initial word splits
+
+print("\n --- Starting BPE(Bite Pair Encoder) Merges ---")
+print(f"Initial Splits : {current_splits}")
+print("-" * 30)
+
+for i in range(num_merges) :
+    print(f"\nMerge Iteration {i+1}/{num_merges}")
+    
+    # 1 Calculate pair frequencies
+    
+    pair_stats = get_pair_stats(current_splits)
+    if not pair_stats:
+        print("No more pairs to merge.")
+        break
+    
+    #Optional
+    sorted_pairs = sorted(pair_stats.items(),key=lambda item:item[1], reverse=True)
+    print(f"Top 5 pair Frequencies : {sorted_pairs[:5]}")
+    
+    # Find the best Pair
+    
+    best_pair = max(pair_stats,key=pair_stats.get)
+    best_freq = pair_stats[best_pair]
+    
+    print(f"Found Best Pair : {best_pair} with Frequency: {best_freq}")
+    
+    # Merge the Best Pair
+    current_splits  = merge_pair(best_pair,current_splits)
+    new_token = best_pair[0] + best_pair[1]
+    
+    print(f"Merging {best_pair} into {new_token}")
+    print(f"Splits after merge : {current_splits}")
+    
+    # Update Vocabulary
+    
+    vocab.append(new_token)
+    print(f"Updated Vocabulary : {vocab}")
+    
+    # 5. Store Merge Rule
+    
+    merges[best_pair] = new_token
+    print(f"Updated Meges: {merges}")
+    
+    print("-"*30)
+
+print("\n--- BPE Meges Complete ---")
+print(f"Final Vocabulary Size : {len(vocab)}")
+print("\nLearned Meges (Pair -> New Token)")
 
 
+# Pretty print merges
+
+for pair, token in merges.items():
+    print(f"{pair} -> {token}")
+
+print("\nFinal Word Splits after all merges:")
+print(current_splits)
+
+print("\nFinal Vocabulary (sorted):")
+final_vocab_sorted = sorted(list(vocab))
+print(final_vocab_sorted) 
