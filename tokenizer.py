@@ -130,13 +130,13 @@ for i in range(num_merges) :
     # 5. Store Merge Rule
     
     merges[best_pair] = new_token
-    print(f"Updated Meges: {merges}")
+    print(f"Updated Merges: {merges}")
     
     print("-"*30)
 
-print("\n--- BPE Meges Complete ---")
+print("\n--- BPE Merges Complete ---")
 print(f"Final Vocabulary Size : {len(vocab)}")
-print("\nLearned Meges (Pair -> New Token)")
+print("\nLearned Merges (Pair -> New Token)")
 
 
 # Pretty print merges
@@ -149,4 +149,4 @@ print(current_splits)
 
 print("\nFinal Vocabulary (sorted):")
 final_vocab_sorted = sorted(list(vocab))
-print(final_vocab_sorted) 
+print(final_vocab_sorted)
